@@ -18,10 +18,8 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-import client.controller.ConditionalPaintPane;
 import client.controller.EventList;
 import client.controller.NameList;
-import client.controller.PaintFunction;
 import client.controller.SearchBar;
 import client.controller.SearchBar.*;
 import client.model.InfoPacket;
