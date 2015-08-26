@@ -51,8 +51,6 @@ public class MainWindow extends JFrame {
 	private EditPane _currentEditPane;
 
 	private ArrayList<JComponent> _components;
-	private ConditionalPaintPane _namePane;
-	private SearchBar _searchBar;
 
 	public MainWindow(MainModel model) {
 		super();
@@ -66,15 +64,7 @@ public class MainWindow extends JFrame {
 		setVisible(true);
 
 		//we will add all the main window's components to this content pane
-		_contentPane = new JLayeredPane() {
-			@Override
-			public void paint(Graphics g) {
-				super.paint(g);
-				_namePane.repaint();
-				_searchBar.repaint();
-				_namePane.setPaintFunction(createPaintFunction());
-			}
-		};
+		_contentPane = new JLayeredPane();
 		_contentPane.setLayout(null);
 		setContentPane(_contentPane);
 
@@ -85,15 +75,15 @@ public class MainWindow extends JFrame {
 		EventList eventList = new EventList(_model, eventPane);
 		eventPane.setViewportView(eventList);
 		_contentPane.add(MainView.formatJComponent(eventPane, EVENT_SELECTOR_WIDTH, 
-				mainHeight - MENU_PADDING * 2, MENU_PADDING, MENU_PADDING));
+				mainHeight - MENU_PADDING * 2, MENU_PADDING, MENU_PADDING), 50, 0);
 
 		//LIST OF PROFILES
-		_namePane = new ConditionalPaintPane();
-		NameList masterList = new NameList(3, _model, _namePane);
-		_namePane.setViewportView(masterList);
-		_contentPane.add(MainView.formatJComponent(_namePane, MAIN_WIDTH - MENU_PADDING * 3 - EVENT_SELECTOR_WIDTH, 
+		JScrollPane namePane = new JScrollPane();
+		NameList masterList = new NameList(3, _model, namePane);
+		namePane.setViewportView(masterList);
+		_contentPane.add(MainView.formatJComponent(namePane, MAIN_WIDTH - MENU_PADDING * 3 - EVENT_SELECTOR_WIDTH, 
 				mainHeight - MENU_HEIGHT - MENU_PADDING * 3, MENU_PADDING * 2 + EVENT_SELECTOR_WIDTH, MENU_HEIGHT + MENU_PADDING * 2));
-		_components.add(_namePane);
+		_components.add(namePane);
 
 		//NEW PROFILE BUTTON
 		JButton newProfileButton = new JButton("(+) New Profile");
@@ -103,17 +93,17 @@ public class MainWindow extends JFrame {
 
 		//SEARCH BAR
 		int searchBarWidth = MAIN_WIDTH - (MENU_PADDING * 5 + EVENT_SELECTOR_WIDTH + BUTTON_WIDTH * 2);
-		_searchBar = new SearchBar("Search the database...");
-		_contentPane.add(MainView.formatJComponent(_searchBar, searchBarWidth, MENU_HEIGHT,
-				MENU_PADDING * 3 + EVENT_SELECTOR_WIDTH + BUTTON_WIDTH, MENU_PADDING), 0);
-		updateSearchableContents(_searchBar);
-		_searchBar.setSelectionListener(new MySelectionListener() {
+		SearchBar searchBar = new SearchBar("Search the database...");
+		_contentPane.add(MainView.formatJComponent(searchBar, searchBarWidth, MENU_HEIGHT,
+				MENU_PADDING * 3 + EVENT_SELECTOR_WIDTH + BUTTON_WIDTH, MENU_PADDING), 51, 0);
+		updateSearchableContents(searchBar);
+		searchBar.setSelectionListener(new MySelectionListener() {
 			@Override
 			public void elementSelected(SelectionEvent e) {
 				masterList.findIDInList(_model.getIDFromName(e.getSelectedElement()));
 			}
 		});
-		_components.add(_searchBar);
+		_components.add(searchBar);
 
 		//EDIT PROFILE BUTTON
 		JButton editProfileButton = new JButton("Edit Profile");
@@ -149,14 +139,5 @@ public class MainWindow extends JFrame {
 		for (JComponent c : _components) {
 			c.setEnabled(b);
 		}
-	}
-	
-	private PaintFunction createPaintFunction() {
-		return new PaintFunction() {
-			@Override
-			public void perform() {
-				_contentPane.repaint();
-			}
-		};
 	}
 }

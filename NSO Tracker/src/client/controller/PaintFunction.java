@@ -15,7 +15,7 @@ public abstract class PaintFunction {
 		perform();
 	}
 	
-	public abstract void perform();
+	protected abstract void perform();
 	
 	public boolean isUsed() {
 		return _used;
