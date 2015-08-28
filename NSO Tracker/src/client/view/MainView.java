@@ -45,6 +45,10 @@ public class MainView implements Runnable {
 		_mainWindow.saveSuccessful(b);
 	}
 	
+	public void eventSelected(String eventName) {
+		_mainWindow.eventSelected(eventName);
+	}
+	
 	/** sizes and places a JComponent so that this does not have to be done repeatedly **/
 	public static JComponent formatJComponent(JComponent component, int width, int height, int x, int y) {
 		component.setSize(width, height);

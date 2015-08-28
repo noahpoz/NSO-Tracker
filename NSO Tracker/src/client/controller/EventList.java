@@ -1,43 +1,56 @@
 package client.controller;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionListener;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.BorderFactory;
-import javax.swing.JList;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import client.model.MainModel;
 import client.view.MainView;
 
+@SuppressWarnings("serial")
 public class EventList extends JTable implements Observer {
-	
+
 	MainModel _model;
 	JScrollPane _superPane;
-	ActionListener _listener;
+	
+	private ListSelectionListener _selectionListener;
+	private int _lastSelectedIndex;
 	
 	String[][] _currentListElements;
-	
-	public static final String TITLE = MainView.spacePadding(18) + "Events";
-	
+
+	public static final String TITLE = MainView.spacePadding(17) + "Events";
+
 	public EventList(MainModel model, JScrollPane pane) {
 		_model = model;
 		_superPane = pane;
-		
+
 		_model.addObserver(this);
-		
-		setModel(new DefaultTableModel(new String[][] {{}}, new String[] {TITLE}));
+
+		setModel(new CustomTableModel(new String[][] {{}}, new String[] {TITLE}));
 		getTableHeader().setPreferredSize(new Dimension(getWidth(), 30));
 		getTableHeader().setFont(MainView.sansSerif(12));
 		setRowHeight(20);
+		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+		_selectionListener = new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (getSelectedRow() > -1) { 
+					_lastSelectedIndex =  getSelectedRow();
+					String id = _currentListElements[getSelectedRow()][1];
+					_model.eventSelected(id);
+				}
+			}
+		};
 	}
-	
+
 	@Override
 	public void update(Observable o, Object arg) {
 		_currentListElements = new String[_model.getEvents().size()][2];
@@ -49,11 +62,20 @@ public class EventList extends JTable implements Observer {
 			temp[index][0] = s[0];
 			index++;
 		}
-		setModel(new DefaultTableModel(temp, new String[] {TITLE}));
-	}
-	
-	public void setActionListener(ActionListener a) {
-		_listener = a;
+		getSelectionModel().removeListSelectionListener(_selectionListener);
+		setModel(new CustomTableModel(temp, new String[] {TITLE}));
+		setRowSelectionInterval(0, _lastSelectedIndex);
+		getSelectionModel().addListSelectionListener(_selectionListener);
 	}
 
+	private class CustomTableModel extends DefaultTableModel {
+		public CustomTableModel(Object[][] a, Object[] b) {
+			super(a, b);
+		}
+
+		@Override
+		public boolean isCellEditable(int row, int column){  
+			return false;  
+		}
+	}
 }

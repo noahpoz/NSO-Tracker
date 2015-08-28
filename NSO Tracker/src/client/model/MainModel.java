@@ -12,7 +12,8 @@ public class MainModel extends Observable {
 	private boolean _viewNotSet;
 	
 	private ArrayList<InfoPacket> _infoPackets;
-	private String _currentEventID;
+	private ArrayList<InfoPacket> _currentInfoPackets;
+	private ArrayList<String[]> _events;
 	
 	private Random _numGenerator;
 	
@@ -22,11 +23,28 @@ public class MainModel extends Observable {
 		
 		_numGenerator = new Random();
 		
-		_infoPackets = new ArrayList<InfoPacket>();
+		// ****** Temporary Profile Information ******
+		String ellicott = generateRandomID();
+		String[] temp1 = new String[] {"Ellicott Bowl Bash", ellicott};
+		String[] temp2 = new String[] {"Ice Cream Social", generateRandomID()};
 		
-		for (int i = 0; i < 30; i++) {
-			_infoPackets.add(new InfoPacket(generateRandomID()));
-		}
+		_events = new ArrayList<String[]>();
+		_events.add(temp1);
+		_events.add(temp2);
+		
+		_infoPackets = new ArrayList<InfoPacket>();
+		_currentInfoPackets = new ArrayList<InfoPacket>();
+		
+		InfoPacket a = new InfoPacket(generateRandomID(), ellicott);
+		a.name = "Noah Poczciwinski";
+		
+		InfoPacket b = new InfoPacket(generateRandomID(), ellicott);
+		b.name = "Christian Koehler";
+		
+		_infoPackets.add(a);
+		_infoPackets.add(b);
+		
+		// ******
 		
 	}
 	
@@ -40,31 +58,43 @@ public class MainModel extends Observable {
 		}
 	}
 	
-	public void saveBasicInfo(String[] fields) {
-		_view.saveSuccessful(true);
-	}
-	
-	public void saveFollowUpInfo(String[] fields) {
+	public void saveProfile(String profileID) {
+		//insert code to save data in the cloud
 		_view.saveSuccessful(true);
 	}
 	
 	public ArrayList<InfoPacket> getCurrentEventPackets() {
-		return _infoPackets;
+		ArrayList<InfoPacket> temp = new ArrayList<InfoPacket>();
+		for (InfoPacket p : _currentInfoPackets) {
+			temp.add(p.deepCopy());
+		}
+		return temp;
 	}
 	
 	public void eventSelected(String id) {
+		//insert code for adjusting current event packets
+		String eventName = "";
+		for (String[] s : _events) {
+			if (s[1].equals(id)) {
+				eventName = s[0];
+				break;
+			}
+		}
+		_view.eventSelected(eventName);
 		
+		_currentInfoPackets = new ArrayList<InfoPacket>();
+		for (InfoPacket p : _infoPackets) {
+			if (p.getEventID().equals(id)) {
+				_currentInfoPackets.add(p);
+			}
+		}
+		
+		setChanged();
+		notifyObservers();
 	}
 	
 	public ArrayList<String[]> getEvents() {
-		String[] temp1 = new String[] {"Ellicott Bowl Bash", generateRandomID()};
-		String[] temp2 = new String[] {"Ice Cream Social", generateRandomID()};
-		
-		ArrayList<String[]> list = new ArrayList<String[]>();
-		list.add(temp1);
-		list.add(temp2);
-		
-		return list;
+		return _events;
 	}
 	
 	private String generateRandomID() {
@@ -74,7 +104,7 @@ public class MainModel extends Observable {
 	
 	public String getIDFromName(String s) {
 		for (InfoPacket p : _infoPackets) {
-			if (p.getName().equals(s)) return p.getID(); 
+			if (p.name.equals(s)) return p.getProfileID(); 
 		}
 		return null;
 	}
